@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting Summarizer</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        label {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #34495e;
+        }
+        input[type="file"] {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 2px dashed #3498db;
+            border-radius: 5px;
+            background: #ecf0f1;
+            cursor: pointer;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #fileInfo {
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #34495e;
+            display: none;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .description {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        #loading {
+            display: none;
+            margin-top: 20px;
+            font-weight: bold;
+            color: #3498db;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+    <script>
+        // Responsive adjustments for smaller screens
+        function adjustResponsive() {
+            const container = document.querySelector('.container');
+            const h1 = document.querySelector('h1');
+            const button = document.querySelector('button[type="submit"]');
+            if (window.innerWidth <= 480) {
+                container.style.padding = '15px';
+                h1.style.fontSize = '1.5em';
+                button.style.padding = '12px 20px';
+                button.style.fontSize = '16px';
+            } else if (window.innerWidth <= 768) {
+                container.style.padding = '20px';
+                h1.style.fontSize = '2em';
+                button.style.padding = '15px 30px';
+                button.style.fontSize = '18px';
+            } else {
+                container.style.padding = '40px';
+                h1.style.fontSize = '2.5em';
+                button.style.padding = '15px 30px';
+                button.style.fontSize = '18px';
+            }
+        }
+        window.addEventListener('resize', adjustResponsive);
+        window.addEventListener('load', adjustResponsive);
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Meeting Summarizer</h1>
+        <form action="/process" method="post" enctype="multipart/form-data" id="uploadForm">
+            <label for="audio">Select audio file:</label>
+            <input type="file" name="audio" accept="audio/*" required id="audioInput">
+            <div id="fileInfo"></div>
+            <button type="submit">Upload and Process</button>
+        </form>
+        <div id="loading">
+            <div class="spinner"></div>
+            Processing your file, please wait...
+        </div>
+        <p class="description">Upload your meeting audio file to get transcription, summary, action items, and sentiment analysis.</p>
+    </div>
+    <script>
+        const form = document.getElementById('uploadForm');
+        const loading = document.getElementById('loading');
+        const audioInput = document.getElementById('audioInput');
+        const fileInfo = document.getElementById('fileInfo');
+
+        audioInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                fileInfo.textContent = `Selected: ${file.name} (${sizeMB} MB)`;
+                fileInfo.style.display = 'block';
+            } else {
+                fileInfo.style.display = 'none';
+            }
+        });
+
+        form.addEventListener('submit', (e) => {
+            const file = audioInput.files[0];
+            if (!file) {
+                alert('Please select a file.');
+                e.preventDefault();
+                return;
+            }
+            if (!file.type.startsWith('audio/')) {
+                alert('Please select a valid audio file.');
+                e.preventDefault();
+                return;
+            }
+            if (file.size > 100 * 1024 * 1024) {
+                alert('File size must be less than 100 MB.');
+                e.preventDefault();
+                return;
+            }
+            loading.style.display = 'flex';
+            form.querySelector('button[type="submit"]').disabled = true;
+        });
+    </script>
+</body>
+</html>
